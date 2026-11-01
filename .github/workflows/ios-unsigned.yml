@@ -1,0 +1,89 @@
+name: Build iOS (unsigned IPA)
+
+# Запуск вручную: вкладка Actions -> "Build iOS (unsigned IPA)" -> Run workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install JS dependencies
+        run: npm ci || npm install --no-audit --no-fund
+
+      # Необязательно: если в Settings -> Secrets добавить GOOGLE_MAPS_API_KEY,
+      # ключ подставится в app.json и src/config.js прямо во время сборки
+      - name: Inject Google Maps key from secret (optional)
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          if [ -n "$GOOGLE_MAPS_API_KEY" ]; then
+          node <<'JS'
+          const fs = require('fs');
+          const key = process.env.GOOGLE_MAPS_API_KEY;
+          const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          app.expo.ios = app.expo.ios || {};
+          app.expo.ios.config = { ...(app.expo.ios.config || {}), googleMapsApiKey: key };
+          fs.writeFileSync('app.json', JSON.stringify(app, null, 2));
+          const cfg = fs.readFileSync('src/config.js', 'utf8')
+            .replace(/GOOGLE_API_KEY\s*=\s*'[^']*'/, "GOOGLE_API_KEY = '" + key + "'");
+          fs.writeFileSync('src/config.js', cfg);
+          JS
+          fi
+
+      - name: Generate native iOS project
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Build app (Release, unsigned)
+        working-directory: ios
+        run: |
+          set -eo pipefail
+          WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
+          SCHEME="${WORKSPACE%.xcworkspace}"
+          echo "Workspace: $WORKSPACE, scheme: $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            | tee xcodebuild.log
+
+      - name: Package IPA
+        working-directory: ios
+        run: |
+          set -e
+          APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -n 1)
+          echo "App bundle: $APP"
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry uklon-clone-unsigned.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: uklon-clone-ios-unsigned
+          path: ios/uklon-clone-unsigned.ipa
+          retention-days: 14
+
+      - name: Upload build log (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: ios/xcodebuild.log
+          retention-days: 7
