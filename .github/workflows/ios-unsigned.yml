@@ -8,6 +8,8 @@ jobs:
   build-ios:
     runs-on: macos-15
     timeout-minutes: 60
+    env:
+      CI: "1"
 
     steps:
       - name: Checkout
@@ -16,13 +18,18 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      - name: Prepare logs dir
+        run: mkdir -p logs
 
       - name: Install JS dependencies
-        run: npm ci || npm install --no-audit --no-fund
+        run: |
+          set -o pipefail
+          (npm ci 2>&1 | tee logs/npm.log) || (npm install --legacy-peer-deps --no-audit --no-fund 2>&1 | tee -a logs/npm.log)
 
-      # Необязательно: если в Settings -> Secrets добавить GOOGLE_MAPS_API_KEY,
-      # ключ подставится в app.json и src/config.js прямо во время сборки
+      # Необязательно: секрет GOOGLE_MAPS_API_KEY (Settings -> Secrets and variables -> Actions)
+      # подставляется в app.json и src/config.js во время сборки
       - name: Inject Google Maps key from secret (optional)
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
@@ -41,13 +48,15 @@ jobs:
           JS
           fi
 
-      - name: Generate native iOS project
-        run: npx expo prebuild --platform ios --clean
+      - name: Generate native iOS project (prebuild)
+        run: |
+          set -o pipefail
+          npx expo prebuild --platform ios --clean 2>&1 | tee logs/prebuild.log
 
       - name: Build app (Release, unsigned)
         working-directory: ios
         run: |
-          set -eo pipefail
+          set -o pipefail
           WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
           SCHEME="${WORKSPACE%.xcworkspace}"
           echo "Workspace: $WORKSPACE, scheme: $SCHEME"
@@ -61,7 +70,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            | tee xcodebuild.log
+            2>&1 | tee ../logs/xcodebuild.log
 
       - name: Package IPA
         working-directory: ios
@@ -80,10 +89,22 @@ jobs:
           path: ios/uklon-clone-unsigned.ipa
           retention-days: 14
 
-      - name: Upload build log (on failure)
+      # --- Диагностика при падении ---
+      - name: Show error summary (on failure)
         if: failure()
+        run: |
+          for f in logs/*.log; do
+            echo "=================== $f (last 60 lines) ==================="
+            tail -n 60 "$f"
+          done
+          echo "=================== lines with 'error' ==================="
+          grep -hiE "error:|npm ERR!|CocoaPods|\[!\]" logs/*.log | head -n 40 || true
+
+      - name: Upload logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: xcodebuild-log
-          path: ios/xcodebuild.log
+          name: build-logs
+          path: logs/
+          if-no-files-found: ignore
           retention-days: 7
