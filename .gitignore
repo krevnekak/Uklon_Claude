@@ -1,0 +1,44 @@
+# Зависимости (весят сотни мегабайт, скачиваются через npm install)
+node_modules/
+
+# Локальный кэш и сборка Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+expo-env.d.ts
+
+# Настройки среды разработки WebStorm
+.idea/
+*.iml
+
+# Файлы с секретами, API-ключами и переменными окружения
+.env
+.env.*
+!.env.example
+
+# Временные файлы и тяжелые кэши сборки Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+
+# На будущее для iOS (если появится папка ios)
+ios/Pods/
+ios/build/
+*.ipa
+*.hmap
+
+# Кэш бандлера Metro и логи ошибок
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Системный мусор ОС (Windows / macOS)
+.DS_Store
+Thumbs.db

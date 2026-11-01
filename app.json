@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Uklon Clone",
+    "slug": "uklon-clone",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.example.uklonclone",
+      "config": { "googleMapsApiKey": "AIzaSyAPk81sEbAtq6wnkchFY8Imnwh1NqF0qGU" },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Геолокація потрібна, щоб визначити, звідки вас забрати."
+      }
+    },
+    "android": {
+      "package": "com.example.uklonclone",
+      "config": { "googleMaps": { "apiKey": "AIzaSyAPk81sEbAtq6wnkchFY8Imnwh1NqF0qGU" } },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "plugins": ["expo-location"]
+  }
+}
