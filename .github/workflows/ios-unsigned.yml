@@ -39,8 +39,11 @@ jobs:
           const fs = require('fs');
           const key = process.env.GOOGLE_MAPS_API_KEY;
           const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
-          app.expo.ios = app.expo.ios || {};
-          app.expo.ios.config = { ...(app.expo.ios.config || {}), googleMapsApiKey: key };
+          const plugins = (app.expo.plugins = app.expo.plugins || []);
+          const idx = plugins.findIndex((p) => (Array.isArray(p) ? p[0] : p) === 'react-native-maps');
+          const prev = idx >= 0 && Array.isArray(plugins[idx]) ? plugins[idx][1] : {};
+          const entry = ['react-native-maps', { ...prev, iosGoogleMapsApiKey: key, androidGoogleMapsApiKey: key }];
+          if (idx >= 0) plugins[idx] = entry; else plugins.push(entry);
           fs.writeFileSync('app.json', JSON.stringify(app, null, 2));
           const cfg = fs.readFileSync('src/config.js', 'utf8')
             .replace(/GOOGLE_API_KEY\s*=\s*'[^']*'/, "GOOGLE_API_KEY = '" + key + "'");
