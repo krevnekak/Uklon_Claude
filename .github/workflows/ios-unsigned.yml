@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-15
+    runs-on: macos-26   # Xcode 26 (Swift 6.2) — нужен для новых пакетов Expo/React Native
     timeout-minutes: 60
     env:
       CI: "1"
@@ -22,6 +22,11 @@ jobs:
 
       - name: Prepare logs dir
         run: mkdir -p logs
+
+      - name: Show Xcode / Swift versions
+        run: |
+          xcodebuild -version
+          swift --version
 
       - name: Install JS dependencies
         run: |

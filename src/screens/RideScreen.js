@@ -113,13 +113,21 @@ export default function RideScreen({ navigation, route: navRoute }) {
   const lastLon = useRef(null); // масштаб, при котором считали смещения плашек
   const offs = useRef(null); // горизонтальные смещения плашек относительно точек
 
-  const computeOffsets = (a, b) => {
+  // Горизонтальный сдвиг плашки относительно «по центру над/под точкой».
+  // Сдвиг нужен только чтобы плашка не вылезала за край экрана, и он ОГРАНИЧЕН:
+  // точка всегда остаётся под/над плашкой. Если точка вне экрана — сдвига нет вообще.
+  const MAX_SHIFT = BUBBLE_W / 2 - 18;
+  const shiftFor = (x, width) => {
     const { w } = mapSizeRef.current;
-    const groupW = BUBBLE_W + 8 + PLUS; // плашка B + кнопка «+»
-    const bLeft = clamp(b.x - BUBBLE_W / 2, 12, w - 12 - groupW);
-    const aLeft = clamp(a.x - BUBBLE_W / 2, 12, w - 12 - BUBBLE_W);
-    return { b: bLeft - b.x, a: aLeft - a.x };
+    if (x < 0 || x > w) return 0;
+    const centered = x - BUBBLE_W / 2;
+    const left = clamp(centered, 12, w - 12 - width);
+    return clamp(left - centered, -MAX_SHIFT, MAX_SHIFT);
   };
+  const computeOffsets = (a, b) => ({
+    b: shiftFor(b.x, BUBBLE_W + 8 + PLUS), // плашка B + кнопка «+»
+    a: shiftFor(a.x, BUBBLE_W),
+  });
 
   const updatePoints = useCallback(async (region) => {
     if (region?.longitudeDelta) lonRef.current = region.longitudeDelta;
@@ -159,7 +167,7 @@ export default function RideScreen({ navigation, route: navRoute }) {
 
   const fit = useCallback(() => {
     mapRef.current?.fitToCoordinates(route.coordinates, {
-      edgePadding: { top: insets.top + 110, right: 50, bottom: 90, left: 50 },
+      edgePadding: { top: insets.top + 110, right: 70, bottom: 90, left: 70 },
       animated: false,
     });
     setTimeout(updatePoints, 300);
