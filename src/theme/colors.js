@@ -6,7 +6,7 @@ export const colors = {
   yellow: '#FFDD33',
   yellowSoft: '#FFE66B',
   text: '#ffffff',
-  textMuted: '#9a9cab',
+  textMuted: '#c7c7cd',
   route: '#8c8c99',
   danger: '#ff6b6b',
 };

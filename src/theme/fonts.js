@@ -6,7 +6,9 @@ export const fontAssets = {
   'UklonRuhCaps-Black': require('../../assets/fonts/UklonRuhCaps/UklonRuhCaps-Black.ttf'),
   'MiSans-Regular': require('../../assets/fonts/MiSans/MiSans-Regular.ttf'),
   'MiSans-Medium': require('../../assets/fonts/MiSans/MiSans-Medium.ttf'),
+  'MiSans-Normal': require('../../assets/fonts/MiSans/MiSans-Normal.ttf'),
   'MiSans-Semibold': require('../../assets/fonts/MiSans/MiSans-Semibold.ttf'),
+  'MiSans-Demibold': require('../../assets/fonts/MiSans/MiSans-Demibold.ttf'),
   'MiSans-Bold': require('../../assets/fonts/MiSans/MiSans-Bold.ttf'),
 };
 
@@ -20,6 +22,8 @@ export const fonts = {
   accentBlack: 'UklonRuhCaps-Black',
   regular: 'MiSans-Regular',
   medium: 'MiSans-Medium',
+  normal: 'MiSans-Normal',
+  demibold: 'MiSans-Demibold',
   semibold: 'MiSans-Semibold',
   bold: 'MiSans-Bold',
 };
