@@ -14,8 +14,8 @@ export const darkMapStyle = [
 
   // Суша: застройка светлее, природа темнее
   { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#181818' }] },
-  { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#1c1c1c' }] },
-  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#0d0d0d' }] },
+  { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#121212' }] },
+  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#1e1e1e' }] },
 
   // Места (POI) и парки — показываем явно
   { featureType: 'poi', stylers: [{ visibility: 'on' }] },

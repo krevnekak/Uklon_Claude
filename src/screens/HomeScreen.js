@@ -11,6 +11,9 @@ import { autocomplete, placeDetails, reverseGeocode, getRoute } from '../api/goo
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { TEST_MODE, TEST_DATA, straightRoute } from '../testMode';
+import ShortcutChips from '../components/ShortcutChips';
+import ShortcutsModal from '../components/ShortcutsModal';
+import { loadShortcuts, saveShortcuts } from '../storage';
 
 export default function HomeScreen({ navigation }) {
   const [fromText, setFromText] = useState('');
@@ -18,6 +21,8 @@ export default function HomeScreen({ navigation }) {
   const [fromPlace, setFromPlace] = useState(null);
   const [toPlace, setToPlace] = useState(null);
   const [price, setPrice] = useState('');
+  const [shortcuts, setShortcuts] = useState([]); // быстрые адреса («Работа», «Дом»...)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [surge, setSurge] = useState(''); // необязательный повышенный коэффициент
   const [active, setActive] = useState(null); // 'from' | 'to'
   const [suggestions, setSuggestions] = useState([]);
@@ -80,6 +85,22 @@ export default function HomeScreen({ navigation }) {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    loadShortcuts().then(setShortcuts);
+  }, []);
+
+  const updateShortcuts = (list) => {
+    setShortcuts(list);
+    saveShortcuts(list);
+  };
+
+  // Нажатие на быструю кнопку — адрес сразу подставляется в нужное поле
+  const pickShortcut = (field, sc) => {
+    setError('');
+    applyPlace(field, sc.place);
+    Keyboard.dismiss();
+  };
 
   const onChange = (field, text) => {
     setError('');
@@ -168,6 +189,7 @@ export default function HomeScreen({ navigation }) {
               onClear={() => onChange('from', '')}
               onLocate={() => useMyLocation('from')}
           />
+          <ShortcutChips shortcuts={shortcuts} onPick={(sc) => pickShortcut('from', sc)} onAdd={() => setShortcutsOpen(true)} />
           <View style={{ height: 10 }} />
           <AddressInput
               inputRef={toRef}
@@ -180,6 +202,7 @@ export default function HomeScreen({ navigation }) {
               onClear={() => onChange('to', '')}
               onLocate={() => useMyLocation('to')}
           />
+          <ShortcutChips shortcuts={shortcuts} onPick={(sc) => pickShortcut('to', sc)} onAdd={() => setShortcutsOpen(true)} />
 
           {!!error && <Text style={styles.error}>{error}</Text>}
 
@@ -236,6 +259,13 @@ export default function HomeScreen({ navigation }) {
             {loading ? <ActivityIndicator color="#1c1d26" /> : <Text style={styles.buttonText}>Знайти авто</Text>}
           </TouchableOpacity>
         </ScrollView>
+
+        <ShortcutsModal
+            visible={shortcutsOpen}
+            onClose={() => setShortcutsOpen(false)}
+            shortcuts={shortcuts}
+            onChange={updateShortcuts}
+        />
       </SafeAreaView>
   );
 }

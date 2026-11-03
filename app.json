@@ -1,20 +1,24 @@
 {
   "expo": {
-    "name": "Uklon Clone",
-    "slug": "uklon-clone",
+    "name": "CityDrive",
+    "slug": "citydrive",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.example.uklonclone",
+      "bundleIdentifier": "com.example.citydrive",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Геолокація потрібна, щоб визначити, звідки вас забрати."
+        "NSLocationWhenInUseUsageDescription": "Геолокація потрібна, щоб визначити ваше місцезнаходження."
       }
     },
     "android": {
-      "package": "com.example.uklonclone",
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "package": "com.example.citydrive",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-location",
