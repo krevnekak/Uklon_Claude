@@ -24,7 +24,8 @@
           "iosGoogleMapsApiKey": "AIzaSyAPk81sEbAtq6wnkchFY8Imnwh1NqF0qGU",
           "androidGoogleMapsApiKey": "AIzaSyAPk81sEbAtq6wnkchFY8Imnwh1NqF0qGU"
         }
-      ]
+      ],
+      "./plugins/withUkrainianMaps"
     ]
   }
 }

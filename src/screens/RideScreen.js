@@ -9,6 +9,7 @@ import {Ionicons, MaterialCommunityIcons} from '@expo/vector-icons';
 import {colors} from '../theme/colors';
 import {fonts} from '../theme/fonts';
 import {darkMapStyle} from '../theme/mapStyle';
+import {GOOGLE_MAP_ID} from '../mapConfig';
 
 const {width: SCREEN_W} = Dimensions.get('window');
 const BUBBLE_W = 190;
@@ -247,7 +248,8 @@ export default function RideScreen({navigation, route: navRoute}) {
                     style={StyleSheet.absoluteFill}
                     provider={MAP_PROVIDER}
                     userInterfaceStyle="dark"
-                    customMapStyle={darkMapStyle}
+                    googleMapId={GOOGLE_MAP_ID || undefined}
+                    customMapStyle={GOOGLE_MAP_ID ? undefined : darkMapStyle}
                     toolbarEnabled={false}
                     showsCompass={false}
                     mapPadding={{top: 0, left: 0, right: 0, bottom: 46}}
